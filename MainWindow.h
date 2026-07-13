@@ -3,9 +3,11 @@
 
 #include <QMainWindow>
 #include <QThread>
+#include <QButtonGroup>
+#include <QtCharts/QChartView>
 #include "StudentTableModel.h"
+#include "StatisticsService.h"
 
-// 引入编译生成的 UI 类（由 .ui 文件自动生成）
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
 QT_END_NAMESPACE
@@ -21,12 +23,22 @@ private slots:
     void onAddStudent();
     void onDeleteStudent();
     void onExportCSV();
-
+    void onCategoryChanged(int id);
+    void onChartTypeChanged(int id);
+    void onCategorySwitchClicked();   // 分类按钮槽函数
+    void onChartTypeSwitchClicked();  // 图表类型按钮槽函数
+    void updateChart();               // 刷新图表
 
 private:
+    void updateButtonTexts();
+    Ui::MainWindow *ui;
+    QChartView *chartView;
+    QButtonGroup *categoryGroup;
+    QButtonGroup *chartTypeGroup;
+    bool m_isPie;
+    StatisticsService::StatisticsCategory m_currentCategory;
     QThread* m_loadThread = nullptr;
     bool m_isLoading = false;
-    Ui::MainWindow *ui;          // 唯一界面指针，替代所有手写 new 的控件
     StudentTableModel *m_tableModel;
     bool m_isDarkTheme = false;
 };

@@ -17,52 +17,111 @@
 #include <QtCharts/QBarSeries>
 #include <QStringConverter>
 #include <QSqlDatabase>
+#include <QBarCategoryAxis>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
     , m_tableModel(new StudentTableModel(this))
-    , m_isDarkTheme(false)
-    , m_loadThread(nullptr)
-    , m_isLoading(false)
 {
     ui->setupUi(this);
     ui->tableView->setModel(m_tableModel);
     ui->tableView->setEditTriggers(QAbstractItemView::DoubleClicked);
-
-    ui->lblUserInfo->setText(QString("当前用户: %1 (%2)").arg(SessionManager::getInstance().getUsername(),
-                                                              SessionManager::getInstance().isAdmin() ? "管理员" : "普通用户"));
+    ui->lblUserInfo->setText(QString("当前用户: %1 (%2)").arg(SessionManager::getInstance().getUsername(),SessionManager::getInstance().isAdmin() ? "管理员" : "普通用户"));
 
     if (!SessionManager::getInstance().isAdmin()) {
         ui->btnAdd->setEnabled(false);
         ui->btnDelete->setEnabled(false);
     }
 
-    // 性别饼图
-    QPieSeries *pieSeries = StatisticsService::getInstance().getGenderPie();
-    QChart *genderChart = new QChart();
-    genderChart->addSeries(pieSeries);
-    genderChart->setTitle("性别比例");
-    ui->genderChartView->setChart(genderChart);
-    ui->genderChartView->setRenderHint(QPainter::Antialiasing);
+    chartView = ui->chartView;
+    updateChart();
+    m_currentCategory = StatisticsService::Class;
+    m_isPie = true;
+    updateButtonTexts();
 
-    // 年龄柱状图（原始版本，无坐标轴）
-    QBarSeries *barSeries = StatisticsService::getInstance().getAgeBarChart();
-    QChart *ageChart = new QChart();
-    ageChart->addSeries(barSeries);
-    ageChart->setTitle("年龄分布");
-    ui->ageChartView->setChart(ageChart);
-    ui->ageChartView->setRenderHint(QPainter::Antialiasing);
-
-    connect(ui->btnRefresh, &QPushButton::clicked, this, &MainWindow::loadDataAsync);
-    connect(ui->btnAdd, &QPushButton::clicked, this, &MainWindow::onAddStudent);
-    connect(ui->btnDelete, &QPushButton::clicked, this, &MainWindow::onDeleteStudent);
-    connect(ui->btnExport, &QPushButton::clicked, this, &MainWindow::onExportCSV);
+    connect(ui->btnRefresh, &QPushButton::clicked,this, &MainWindow::loadDataAsync);
+    connect(ui->btnAdd, &QPushButton::clicked,this, &MainWindow::onAddStudent);
+    connect(ui->btnDelete, &QPushButton::clicked,this, &MainWindow::onDeleteStudent);
+    connect(ui->btnExport, &QPushButton::clicked,this, &MainWindow::onExportCSV);
+    connect(ui->btnCategory, &QPushButton::clicked,this, &MainWindow::onCategorySwitchClicked);
+    connect(ui->btnChartType, &QPushButton::clicked,this, &MainWindow::onChartTypeSwitchClicked);
 
     QSettings settings("MyCompany", "StudentMS");
     ui->mainSplitter->restoreState(settings.value("splitterState").toByteArray());
 
     loadDataAsync();
+}
+
+void MainWindow::updateButtonTexts()
+{
+    QString catText;
+    switch (m_currentCategory) {
+    case StatisticsService::Gender: catText = "分类：性别"; break;
+    case StatisticsService::Age:    catText = "分类：年龄"; break;
+    case StatisticsService::Class:  catText = "分类：班级"; break;
+    }
+    ui->btnCategory->setText(catText);
+
+    ui->btnChartType->setText(m_isPie ? "饼图" : "柱状图");
+}
+
+void MainWindow::onCategorySwitchClicked()
+{
+    switch (m_currentCategory) {
+    case StatisticsService::Gender: m_currentCategory = StatisticsService::Age;    break;
+    case StatisticsService::Age:    m_currentCategory = StatisticsService::Class;  break;
+    case StatisticsService::Class:  m_currentCategory = StatisticsService::Gender; break;
+    }
+    updateButtonTexts();
+    updateChart();
+}
+void MainWindow::onChartTypeSwitchClicked()
+{
+    m_isPie = !m_isPie;
+    updateButtonTexts();
+    updateChart();
+}
+void MainWindow::onCategoryChanged(int id) {
+    Q_UNUSED(id)
+    updateChart();
+}
+void MainWindow::onChartTypeChanged(int id) {
+    Q_UNUSED(id)
+    updateChart();
+}
+
+void MainWindow::updateChart()
+{
+    StatisticsService &service = StatisticsService::getInstance();
+    QChart *chart = new QChart();
+    chart->setTitle("学生统计");
+    chart->setAnimationOptions(QChart::SeriesAnimations);
+
+    if (m_isPie) {
+        // 饼图
+        QPieSeries *series = service.getPieChartByCategory(m_currentCategory);
+        chart->addSeries(series);
+        series->setLabelsVisible(true);
+    } else {
+        // 柱状图
+        QBarSeries *series = service.getBarChartByCategory(m_currentCategory);
+        chart->addSeries(series);
+        chart->createDefaultAxes();
+
+        // 从柱状图系列的属性中获取横轴标签
+        QStringList categories = series->property("categories").toStringList();
+        if (!categories.isEmpty()) {
+            QBarCategoryAxis *axis = new QBarCategoryAxis();
+            axis->append(categories);
+            chart->setAxisX(axis, series);
+        }
+        // 连接数值轴
+        if (!chart->axes(Qt::Vertical).isEmpty())
+            series->attachAxis(chart->axes(Qt::Vertical).first());
+    }
+
+    ui->chartView->setChart(chart);  // 旧图表自动释放
 }
 
 MainWindow::~MainWindow() {

@@ -33,16 +33,30 @@
         </widget>
        </item>
        <item>
-        <widget class="QPushButton" name="btnExport">
+        <widget class="QPushButton" name="btnRefresh">
          <property name="text">
-          <string>📤 导出 CSV</string>
+          <string>🔄 刷新</string>
          </property>
         </widget>
        </item>
        <item>
-        <widget class="QPushButton" name="btnRefresh">
+        <widget class="QPushButton" name="btnCategory">
          <property name="text">
-          <string>🔄 刷新</string>
+          <string>分类：班级</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="btnChartType">
+         <property name="text">
+          <string>饼图</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="btnExport">
+         <property name="text">
+          <string>📤 导出 CSV</string>
          </property>
         </widget>
        </item>
@@ -62,31 +76,7 @@
        <enum>Qt::Orientation::Vertical</enum>
       </property>
       <widget class="QTableView" name="tableView"/>
-      <widget class="QTabWidget" name="tabWidget">
-       <property name="currentIndex">
-        <number>0</number>
-       </property>
-       <widget class="QWidget" name="tabGender">
-        <attribute name="title">
-         <string>性别比例 (饼图)</string>
-        </attribute>
-        <layout class="QVBoxLayout" name="verticalLayout_2">
-         <item>
-          <widget class="QChartView" name="genderChartView" native="true"/>
-         </item>
-        </layout>
-       </widget>
-       <widget class="QWidget" name="tabAge">
-        <attribute name="title">
-         <string>年龄分布 (柱状图)</string>
-        </attribute>
-        <layout class="QVBoxLayout" name="verticalLayout_3">
-         <item>
-          <widget class="QChartView" name="ageChartView" native="true"/>
-         </item>
-        </layout>
-       </widget>
-      </widget>
+      <widget class="QChartView" name="chartView" native="true"/>
      </widget>
     </item>
    </layout>
