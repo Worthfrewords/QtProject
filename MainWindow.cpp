@@ -18,6 +18,7 @@
 #include <QStringConverter>
 #include <QSqlDatabase>
 #include <QBarCategoryAxis>
+#include <QValueAxis>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -99,26 +100,24 @@ void MainWindow::updateChart()
     chart->setAnimationOptions(QChart::SeriesAnimations);
 
     if (m_isPie) {
-        // 饼图
         QPieSeries *series = service.getPieChartByCategory(m_currentCategory);
         chart->addSeries(series);
         series->setLabelsVisible(true);
     } else {
-        // 柱状图
         QBarSeries *series = service.getBarChartByCategory(m_currentCategory);
         chart->addSeries(series);
-        chart->createDefaultAxes();
 
-        // 从柱状图系列的属性中获取横轴标签
+        QBarCategoryAxis *axisX = new QBarCategoryAxis();
         QStringList categories = series->property("categories").toStringList();
         if (!categories.isEmpty()) {
-            QBarCategoryAxis *axis = new QBarCategoryAxis();
-            axis->append(categories);
-            chart->setAxisX(axis, series);
+            axisX->append(categories);
         }
-        // 连接数值轴
-        if (!chart->axes(Qt::Vertical).isEmpty())
-            series->attachAxis(chart->axes(Qt::Vertical).first());
+        chart->addAxis(axisX, Qt::AlignBottom);
+        series->attachAxis(axisX);
+
+        QValueAxis *axisY = new QValueAxis();
+        chart->addAxis(axisY, Qt::AlignLeft);
+        series->attachAxis(axisY);
     }
 
     ui->chartView->setChart(chart);  // 旧图表自动释放
@@ -147,10 +146,8 @@ void MainWindow::loadDataAsync() {
 
     if (m_loadThread) {
         if (m_loadThread->isRunning()) {
-            qDebug() << "[MainWindow] 停止旧线程";
             m_loadThread->quit();
             if (!m_loadThread->wait(2000)) {
-                qWarning() << "旧线程未响应，强制终止";
                 m_loadThread->terminate();
                 m_loadThread->wait();
             }

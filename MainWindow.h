@@ -23,11 +23,12 @@ private slots:
     void onAddStudent();
     void onDeleteStudent();
     void onExportCSV();
+    //图表槽函数
     void onCategoryChanged(int id);
     void onChartTypeChanged(int id);
-    void onCategorySwitchClicked();   // 分类按钮槽函数
-    void onChartTypeSwitchClicked();  // 图表类型按钮槽函数
-    void updateChart();               // 刷新图表
+    void onCategorySwitchClicked();
+    void onChartTypeSwitchClicked();
+    void updateChart();
 
 private:
     void updateButtonTexts();
@@ -35,12 +36,11 @@ private:
     QChartView *chartView;
     QButtonGroup *categoryGroup;
     QButtonGroup *chartTypeGroup;
+    StudentTableModel *m_tableModel;
     bool m_isPie;
     StatisticsService::StatisticsCategory m_currentCategory;
     QThread* m_loadThread = nullptr;
     bool m_isLoading = false;
-    StudentTableModel *m_tableModel;
-    bool m_isDarkTheme = false;
 };
 
 #endif // MAINWINDOW_H

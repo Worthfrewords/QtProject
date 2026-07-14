@@ -19,10 +19,8 @@ QString DatabaseManager::databasePath() {
 
 bool DatabaseManager::initDatabase() {
     if (m_dbPath.isEmpty()) {
-        // 回退方案（一般不会走到这里）
         m_dbPath = QCoreApplication::applicationDirPath() + "/data/school.db";
     }
-
     // 确保目录存在
     QFileInfo fileInfo(m_dbPath);
     QDir dir = fileInfo.absoluteDir();
@@ -77,7 +75,7 @@ bool DatabaseManager::createTables() {
         qDebug() << "插入默认管理员失败:" << query.lastError();
     }
 
-    // 插入测试学生（仅当表为空时）
+    //当表为空时插入默认数据
     query.exec("SELECT COUNT(*) FROM students");
     if (query.next() && query.value(0).toInt() == 0) {
         query.prepare("INSERT INTO students (student_no, name, gender, birthday, class_name, create_by) "

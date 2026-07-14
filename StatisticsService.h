@@ -10,11 +10,10 @@ class StatisticsService : public QObject
 {
     Q_OBJECT
 public:
-    // 统计分类枚举
     enum StatisticsCategory {
         Gender,
         Age,
-        Class //默认
+        Class
     };
 
     static StatisticsService& getInstance();
@@ -25,9 +24,9 @@ public:
     StatisticsCategory currentCategory() const;
 
 private:
-    StatisticsService() : m_currentCategory(Class) {}  // 默认班级
+    StatisticsService() : m_currentCategory(Class) {}
     StatisticsCategory m_currentCategory;
-    QStringList m_lastCategories;    // 缓存最近一次查询的类别顺序
+    QStringList m_lastCategories;    //缓存最近一次查询的类别顺序
     // 各分类的具体实现
     QBarSeries* getGenderBar();
     QBarSeries* getAgeBar();

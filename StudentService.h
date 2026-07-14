@@ -14,8 +14,7 @@ public:
     bool deleteStudent(int studentId);
 private:
     StudentService() = default;
-    QString getCurrentUserFilter();
-    //查找学生对象的输出过滤器,返回 "AND create_by = ?" 或 ""
+
 };
 
 

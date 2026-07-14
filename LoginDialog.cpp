@@ -2,7 +2,6 @@
 #include "ui_LoginDialog.h"
 #include "DatabaseManager.h"
 #include "SessionManager.h"
-#include "StudentTableModel.h"
 #include <QSqlQuery>
 #include <QCryptographicHash>
 #include <QMessageBox>
@@ -14,7 +13,7 @@ LoginDialog::LoginDialog(QWidget *parent)
     , ui(new Ui::LoginDialog)
 {
     ui->setupUi(this);
-    setWindowFlags(Qt::WindowCloseButtonHint | Qt::WindowTitleHint); // 固定大小
+    setWindowFlags(Qt::WindowCloseButtonHint | Qt::WindowTitleHint);
 
     connect(ui->buttonBox, &QDialogButtonBox::accepted, this, &LoginDialog::onLogin);
     connect(ui->buttonBox, &QDialogButtonBox::rejected, this, &QDialog::reject);
@@ -32,9 +31,7 @@ void LoginDialog::onLogin() {
         return;
     }
 
-    // SHA256 哈希
     QByteArray pwdHash = QCryptographicHash::hash(password.toUtf8(), QCryptographicHash::Sha256).toHex();
-
     QSqlDatabase db = DatabaseManager::getInstance().getDatabase();
     if (!db.isOpen()) {
         QMessageBox::critical(this, "数据库错误", "数据库未连接！");
@@ -47,7 +44,7 @@ void LoginDialog::onLogin() {
     query.addBindValue(QString::fromUtf8(pwdHash));
 
     if (!query.exec()) {
-        QMessageBox::critical(this, "查询错误", query.lastError().text());
+        QMessageBox::critical(this, "用户识别失败", query.lastError().text());
         return;
     }
 
@@ -56,7 +53,7 @@ void LoginDialog::onLogin() {
         QString userName = query.value(1).toString();
         QString role = query.value(2).toString();
         SessionManager::getInstance().login(userId, userName, role);
-        accept();  // 关闭对话框并返回 Accepted
+        accept();
     } else {
         QMessageBox::warning(this, "登录失败", "用户名或密码错误！");
         ui->editPassword->clear();

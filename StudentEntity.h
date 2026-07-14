@@ -9,7 +9,7 @@ struct StudentEntity {
     int id = 0;
     QString studentNo;
     QString name;
-    char gender = 'M'; // 'M' or 'F'
+    char gender = 'M';
     QDate birthday;
     QString className;
     int createBy = 0; // 关联 users.id 0为普通用户
