@@ -13,6 +13,7 @@ SOURCES += \
     LoadDataWorker.cpp \
     LoginDialog.cpp \
     MainWindow.cpp \
+    RegisterDialog.cpp \
     SessionManager.cpp \
     StatisticsService.cpp \
     StudentService.cpp \
@@ -23,6 +24,7 @@ HEADERS += \
     LoadDataWorker.h \
     LoginDialog.h \
     MainWindow.h \
+    RegisterDialog.h \
     SessionManager.h \
     StatisticsService.h \
     StudentEntity.h \
@@ -31,7 +33,8 @@ HEADERS += \
 
 FORMS += \
     LoginDialog.ui \
-    MainWindow.ui
+    MainWindow.ui \
+    RegisterDialog.ui
 
 TRANSLATIONS += \
     myProject_zh_CN.ts

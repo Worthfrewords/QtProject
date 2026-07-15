@@ -2,6 +2,7 @@
 #include "ui_LoginDialog.h"
 #include "DatabaseManager.h"
 #include "SessionManager.h"
+#include "RegisterDialog.h"
 #include <QSqlQuery>
 #include <QCryptographicHash>
 #include <QMessageBox>
@@ -17,6 +18,7 @@ LoginDialog::LoginDialog(QWidget *parent)
 
     connect(ui->buttonBox, &QDialogButtonBox::accepted, this, &LoginDialog::onLogin);
     connect(ui->buttonBox, &QDialogButtonBox::rejected, this, &QDialog::reject);
+    connect(ui->btnRegister, &QPushButton::clicked, this, &LoginDialog::onRegisterClicked);
 }
 
 LoginDialog::~LoginDialog() {
@@ -24,8 +26,9 @@ LoginDialog::~LoginDialog() {
 }
 
 void LoginDialog::onLogin() {
+    qDebug() << "onLogin() called, username:" << ui->editUsername->text();
     QString username = ui->editUsername->text().trimmed();
-    QString password = ui->editPassword->text().trimmed();
+    QString password = ui->editPassword->text();
     if (username.isEmpty() || password.isEmpty()) {
         QMessageBox::warning(this, "输入错误", "用户名和密码不能为空！");
         return;
@@ -59,4 +62,9 @@ void LoginDialog::onLogin() {
         ui->editPassword->clear();
         ui->editPassword->setFocus();
     }
+}
+
+void LoginDialog::onRegisterClicked() {
+    RegisterDialog regDlg(this);
+    regDlg.exec();   // 模态显示
 }
